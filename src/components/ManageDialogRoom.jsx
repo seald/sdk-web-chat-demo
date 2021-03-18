@@ -23,6 +23,7 @@ import TextField from '@material-ui/core/TextField'
 import { useSnackbar } from 'notistack'
 
 import { addCustomRoom, addMessage, editCustomRoom } from '../services/firebase'
+import { createEncryptedSession } from '../services/seald'
 import {
   CLOSE_DIALOG_ROOM,
   FAILED_DIALOG_ROOM,
@@ -80,6 +81,14 @@ function ManageDialogRoom() {
     try {
       dispatch({ type: TOGGLE_LOADING_ROOM })
       if (dialogRoom.roomUid) {
+        await Promise.all([
+          dialogRoom.sealdSession.revokeRecipients({
+            userIds: dialogRoom.oldUidUsers.filter(uid => !dialogRoom.selectedUidUsers.includes(uid))
+          }),
+          dialogRoom.sealdSession.addRecipients({
+            userIds: dialogRoom.selectedUidUsers.filter(uid => !dialogRoom.oldUidUsers.includes(uid))
+          })
+        ])
         await editCustomRoom({
           roomName: dialogRoom.roomName,
           usersUid: dialogRoom.selectedUidUsers,
@@ -90,9 +99,14 @@ function ManageDialogRoom() {
           roomName: dialogRoom.roomName,
           usersUid: dialogRoom.selectedUidUsers
         })
+        const sealdSession = await createEncryptedSession({
+          userIds: dialogRoom.selectedUidUsers,
+          metadata: newRoom.key
+        })
+        const encryptedMessage = await sealdSession.encrypt('Hello 👋')
         await addMessage({
           roomId: newRoom.key,
-          message: 'Hello 👋'
+          message: encryptedMessage
         })
         history.push(`/rooms?id=${newRoom.key}`)
       }

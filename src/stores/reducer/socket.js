@@ -22,11 +22,12 @@ const reducer = (state = {}, action) =>
         draft.users = action.payload.users
         break
       case START_EDIT_DIALOG_ROOM: {
-        const { roomUid, selectedUidUsers, roomName } = action.payload
+        const { roomUid, selectedUidUsers, roomName, sealdSession } = action.payload
         draft.dialogRoom.isOpen = true
         draft.dialogRoom.roomUid = roomUid
         draft.dialogRoom.selectedUidUsers = selectedUidUsers
         draft.dialogRoom.roomName = roomName
+        draft.dialogRoom.sealdSession = sealdSession
         draft.dialogRoom.oldUidUsers = Object.freeze(selectedUidUsers)
         break
       }
@@ -58,6 +59,7 @@ const reducer = (state = {}, action) =>
           createdBy: null,
           selectedUidUsers: [],
           roomName: '',
+          sealdSession: null,
           isLoading: false,
           oldUidUsers: []
         }

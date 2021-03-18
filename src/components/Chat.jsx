@@ -10,6 +10,7 @@ import { useImmer } from 'use-immer'
 
 import useQuery from '../hooks/useQuery'
 import { addMessage, db } from '../services/firebase'
+import { createEncryptedSession, retrieveEncryptedSession } from '../services/seald'
 import { START_EDIT_DIALOG_ROOM } from '../stores/reducer/constants'
 import { SocketContext } from '../stores/SocketContext'
 import { filterWithoutCurrentUser } from '../utils/index'
@@ -60,6 +61,7 @@ function Chat() {
   const [{ currentUser, users }, dispatch] = useContext(SocketContext)
   const currentRoomId = useQuery().get('id')
   const list = useRef(null)
+  const sealdSessionRef = useRef(null)
   const [state, setState] = useImmer({
     room: {},
     messages: [],
@@ -103,6 +105,7 @@ function Chat() {
             draft.hasAccess = currentUser.uid in currentRoom.users
             draft.messages = []
           })
+          sealdSessionRef.current = null
 
           currentMessagesRef.on('value', async snp => {
             const messages = Object.entries(snp.val() || {})
@@ -110,11 +113,14 @@ function Chat() {
               .sort((a, b) => a.timestamp - b.timestamp)
 
             if (messages.length) {
+              if (!sealdSessionRef.current) {
+                sealdSessionRef.current = await retrieveEncryptedSession({ encryptedMessage: messages[0].message })
+              }
               setState(draft => {
                 const newMessages = messages.filter(m => draft.messages.every(n => n.id !== m.id))
                 draft.messages.push(
                   ...newMessages.map(m => ({
-                    message: m.message,
+                    message: sealdSessionRef.current.decrypt(m.message),
                     timestamp: m.timestamp,
                     user: m.user,
                     id: m.id
@@ -185,6 +191,7 @@ function Chat() {
       payload: {
         roomUid: state.room.uid,
         roomName: state.room.roomName,
+        sealdSession: sealdSessionRef.current,
         selectedUidUsers: Object.keys(state.users)
       }
     })
@@ -196,9 +203,16 @@ function Chat() {
       enqueueSnackbar('Please select a room or create a new one', { variant: 'error' })
     } else if (state.message.trim()) {
       try {
+        if (!sealdSessionRef.current) {
+          sealdSessionRef.current = await createEncryptedSession({
+            userIds: Object.keys(state.room.users),
+            metadata: state.room.uid
+          })
+        }
+        const encryptedMessage = await sealdSessionRef.current.encrypt(state.message)
         await addMessage({
           roomId: state.room.uid,
-          message: state.message
+          message: encryptedMessage
         })
         setState(draft => {
           draft.message = ''

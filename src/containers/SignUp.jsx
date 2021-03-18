@@ -14,6 +14,7 @@ import { useSnackbar } from 'notistack'
 
 import Copyright from '../components/Copyright'
 import { signUp } from '../services/firebase'
+import { createSealdSDK } from '../services/seald'
 import { SET_AUTH } from '../stores/reducer/constants.js'
 import { SocketContext } from '../stores/SocketContext.jsx'
 
@@ -65,6 +66,7 @@ function SignUp() {
         const password = formData.get('password')
         const displayName = formData.get('name')
         const currentUser = await signUp({ email, password, displayName })
+        await createSealdSDK({ userId: currentUser.uid, password })
         dispatch({ type: SET_AUTH, payload: { currentUser } })
       } catch (error) {
         enqueueSnackbar(error.message, {

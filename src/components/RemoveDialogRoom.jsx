@@ -8,7 +8,8 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import { useSnackbar } from 'notistack'
 import { useImmer } from 'use-immer'
 
-import { removeCustomRoom } from '../services/firebase'
+import { db, removeCustomRoom } from '../services/firebase'
+import { retrieveEncryptedSession } from '../services/seald'
 
 function RemoveDialogRoom(props, ref) {
   const { enqueueSnackbar } = useSnackbar()
@@ -36,7 +37,11 @@ function RemoveDialogRoom(props, ref) {
 
   const handleConfirm = async () => {
     try {
+      const messages = await db.ref(`messages/${state.room.uid}`).limitToFirst(1).once('value')
+      const firstMessage = Object.values(messages.val())[0]
+      const session = await retrieveEncryptedSession({ encryptedMessage: firstMessage.message })
       await removeCustomRoom({ roomUid: state.room.uid })
+      await session.revoke()
       setState(draft => {
         draft.isOpen = false
       })

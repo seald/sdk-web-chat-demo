@@ -13,6 +13,7 @@ const initialState = {
     createdBy: null,
     selectedUidUsers: [],
     roomName: '',
+    sealdSession: null,
     isLoading: false,
     oldUidUsers: []
   }

@@ -6,6 +6,8 @@
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.57",
+    "@seald-io/sdk-plugin-ssks-password": "0.5.2",
+    "@seald-io/sdk-web": "0.5.2",
     "@testing-library/jest-dom": "^5.11.9",
     "@testing-library/react": "^11.2.5",
     "@testing-library/user-event": "^12.8.3",
@@ -18,6 +20,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.3",
     "scrypt-js": "^3.0.1",
+    "sscrypto": "^1.0.2",
     "use-immer": "^0.4.2",
     "web-vitals": "^1.1.0"
   },

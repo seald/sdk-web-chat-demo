@@ -14,6 +14,7 @@ import { useSnackbar } from 'notistack'
 
 import Copyright from '../components/Copyright'
 import { signIn } from '../services/firebase'
+import { retrieveSealdSDK } from '../services/seald'
 import { SET_AUTH } from '../stores/reducer/constants.js'
 import { SocketContext } from '../stores/SocketContext.jsx'
 
@@ -68,6 +69,7 @@ function SignIn() {
         const email = formData.get('email')
         const password = formData.get('password')
         const currentUser = await signIn({ email, password })
+        await retrieveSealdSDK({ userId: currentUser.uid, password })
         dispatch({ type: SET_AUTH, payload: { currentUser } })
         history.replace(from)
       } catch (error) {
