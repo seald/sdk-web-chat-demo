@@ -1,3 +1,9 @@
+> **Warning**
+> 
+> This project has not been updated in a long time, and is **deprecated**.
+> 
+> For a more modern and up-to-date example of how to use the Seald SDK, check out https://github.com/seald/sdk-example-project/ .
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
